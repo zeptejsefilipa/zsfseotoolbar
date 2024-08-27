@@ -1,0 +1,39 @@
+{
+  "manifest_version": 3,
+  "name": "Custom SEO Toolbar",
+  "version": "1.0",
+  "description": "A custom SEO toolbar inspired by MozBar",
+  "permissions": ["storage", "activeTab", "scripting"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_icon": {
+      "19": "images/icon_off_19.png",
+      "38": "images/icon_off_38.png"
+    },
+    "default_title": "Toggle SEO Toolbar"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["styles.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "128": "images/icon_128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "images/icon_on_19.png",
+        "images/icon_on_38.png",
+        "images/icon_off_19.png",
+        "images/icon_off_38.png"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

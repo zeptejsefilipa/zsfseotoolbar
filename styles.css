@@ -1,15 +1,18 @@
 .seo-toolbar {
   width: 100%; /* Zachováme šířku na 100% */
-  height: 30px;
+  height: 20px;
   background-color: #00ffff;
   color: #000;
   text-align: left;
-  line-height: 30px;
+  line-height: 20px;
   position: fixed;
   top: 0;
   left: 0;
   padding: 0 10px;
   z-index: 1000000;
+  font-family: sans-serif;
+  font-weight: 400;
+  font-size: 13px;
 }
 .pointer-cursor {
   cursor: pointer;
@@ -18,7 +21,16 @@
   font-weight: bold;
   cursor: pointer;
 }
+#closeInternalModal, #closeExternalModal, #closeMissingAltsModal {
+  cursor: pointer;
+}
 
 .seo-toolbar .clickable:hover {
   text-decoration: underline;
+}
+#externalLinkModal, #internalLinkModal, #missingAltsModal, #closeInternalModal, #closeExternalModal, #closeMissingAltsModal {
+  color: #000;
+  font-family: sans-serif;
+  font-weight: 400;
+  font-size: 13px;
 }

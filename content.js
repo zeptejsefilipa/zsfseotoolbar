@@ -8,6 +8,16 @@
       toolbar = document.createElement('div');
       toolbar.className = 'seo-toolbar';
 
+      // Zjištění názvu šablony WordPress
+      const themeRegex = /\/wp-content\/themes\/([^\/]+)\//;
+      const matches = document.documentElement.innerHTML.match(themeRegex);
+      let themeName = matches ? matches[1] : 'N/A';
+
+      // Vytvoření textu pro Theme, různé styly pro klikatelné a neklikatelné odkazy
+      let themeLink = themeName !== 'N/A' 
+        ? `<a href="https://themeforest.net/search/${themeName}" target="_blank" style="font-weight: bold; text-decoration: none;" onmouseover="this.style.textDecoration='underline';" onmouseout="this.style.textDecoration='none';">Theme: ${themeName}</a>` 
+        : `Theme: ${themeName}`;
+
       // Počítání jednotlivých typů obrázků na stránce
       const pngCount = document.querySelectorAll('img[src$=".png"]').length;
       const gifCount = document.querySelectorAll('img[src$=".gif"]').length;
@@ -29,13 +39,18 @@
         }
       });
 
+      // Zneaktivnění linku pro Missing Alts, pokud je hodnota nula
+      let missingAltsLink = missingAltCount > 0 
+        ? `<span id="missingAltsCount" class="clickable" style="font-weight: bold; text-decoration: none;" onmouseover="this.style.textDecoration='underline';" onmouseout="this.style.textDecoration='none';">Missing Alts: ${missingAltCount}</span>` 
+        : `Missing Alts: ${missingAltCount}`;
+
       // Zjištění velikosti všech načtených zdrojů na stránce
       let totalSize = 0;
       performance.getEntriesByType("resource").forEach((resource) => {
-        totalSize += resource.transferSize; // transferSize vrací velikost v bajtech
+        totalSize += resource.transferSize;
       });
 
-      const totalSizeKB = (totalSize / 1024).toFixed(2); // převod na kilobajty a zaokrouhlení
+      const totalSizeKB = (totalSize / 1024).toFixed(2);
 
       // Počítání interních a externích odkazů
       const links = document.querySelectorAll('a[href]');
@@ -57,6 +72,16 @@
         }
       });
 
+      // Zneaktivnění linku pro Internal Links, pokud je hodnota nula
+      let internalLinksLink = internalLinkCount > 0 
+        ? `<span id="internalLinkCount" class="clickable" style="font-weight: bold; text-decoration: none;" onmouseover="this.style.textDecoration='underline';" onmouseout="this.style.textDecoration='none';">Internal Links: ${internalLinkCount}</span>` 
+        : `Internal Links: ${internalLinkCount}`;
+
+      // Zneaktivnění linku pro External Links, pokud je hodnota nula
+      let externalLinksLink = externalLinkCount > 0 
+        ? `<span id="externalLinkCount" class="clickable" style="font-weight: bold; text-decoration: none;" onmouseover="this.style.textDecoration='underline';" onmouseout="this.style.textDecoration='none';">External Links: ${externalLinkCount}</span>` 
+        : `External Links: ${externalLinkCount}`;
+
       // Sestavení textu do lišty
       let imageText = 'Images:';
       if (jpgCount > 0) imageText += ` JPG: ${jpgCount}`;
@@ -67,101 +92,107 @@
       if (tiffCount > 0) imageText += `, TIFF: ${tiffCount}`;
       if (webpCount > 0) imageText += `, WEBP: ${webpCount}`;
 
-      imageText += ` | <span id="missingAltsCount" class="clickable">Missing Alts: ${missingAltCount}</span> | Page Size: ${totalSizeKB} KB | <span id="internalLinkCount" class="clickable">Internal Links: ${internalLinkCount}</span> | <span id="externalLinkCount" class="clickable">External Links: ${externalLinkCount}</span>`;
+      imageText += ` | ${missingAltsLink} | Page Size: ${totalSizeKB} KB | ${internalLinksLink} | ${externalLinksLink} | ${themeLink}`;
 
       toolbar.innerHTML = `SEO BAR - ${imageText}`;
-      document.body.style.marginTop = '30px'; // Adjust the page layout
+      document.body.style.marginTop = '20px'; // Adjust the page layout
       document.body.prepend(toolbar);
 
       // Vytvoření modálního okna pro zobrazení chybějících alt tagů
-      let missingAltsModal = document.createElement('div');
-      missingAltsModal.id = 'missingAltsModal';
-      missingAltsModal.style.display = 'none';
-      missingAltsModal.style.position = 'fixed';
-      missingAltsModal.style.zIndex = '1000001';
-      missingAltsModal.style.left = '50%';
-      missingAltsModal.style.top = '50%';
-      missingAltsModal.style.transform = 'translate(-50%, -50%)';
-      missingAltsModal.style.width = '50%';
-      missingAltsModal.style.height = '50%';
-      missingAltsModal.style.overflowY = 'scroll';
-      missingAltsModal.style.backgroundColor = '#fff';
-      missingAltsModal.style.border = '1px solid #ccc';
-      missingAltsModal.style.padding = '10px';
-      missingAltsModal.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
-      missingAltsModal.innerHTML = `<div style="text-align: right;"><button id="closeMissingAltsModal">Close</button></div>${missingAlts}`;
+      if (missingAltCount > 0) {
+        let missingAltsModal = document.createElement('div');
+        missingAltsModal.id = 'missingAltsModal';
+        missingAltsModal.style.display = 'none';
+        missingAltsModal.style.position = 'fixed';
+        missingAltsModal.style.zIndex = '1000001';
+        missingAltsModal.style.left = '50%';
+        missingAltsModal.style.top = '50%';
+        missingAltsModal.style.transform = 'translate(-50%, -50%)';
+        missingAltsModal.style.width = '50%';
+        missingAltsModal.style.height = '50%';
+        missingAltsModal.style.overflowY = 'scroll';
+        missingAltsModal.style.backgroundColor = '#fff';
+        missingAltsModal.style.border = '1px solid #ccc';
+        missingAltsModal.style.padding = '10px';
+        missingAltsModal.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
+        missingAltsModal.innerHTML = `<div style="text-align: right;"><button id="closeMissingAltsModal">Close</button></div>${missingAlts}`;
 
-      document.body.appendChild(missingAltsModal);
+        document.body.appendChild(missingAltsModal);
+
+        // Přidání funkce pro zobrazení modálního okna při kliknutí na "Missing Alts: XX"
+        document.getElementById('missingAltsCount').addEventListener('click', () => {
+          missingAltsModal.style.display = 'block';
+        });
+
+        // Přidání funkce pro zavření modálního okna
+        document.getElementById('closeMissingAltsModal').addEventListener('click', () => {
+          missingAltsModal.style.display = 'none';
+        });
+      }
 
       // Vytvoření modálního okna pro zobrazení interních odkazů
-      let internalModal = document.createElement('div');
-      internalModal.id = 'internalLinkModal';
-      internalModal.style.display = 'none';
-      internalModal.style.position = 'fixed';
-      internalModal.style.zIndex = '1000001';
-      internalModal.style.left = '50%';
-      internalModal.style.top = '50%';
-      internalModal.style.transform = 'translate(-50%, -50%)';
-      internalModal.style.width = '50%';
-      internalModal.style.height = '50%';
-      internalModal.style.overflowY = 'scroll';
-      internalModal.style.backgroundColor = '#fff';
-      internalModal.style.border = '1px solid #ccc';
-      internalModal.style.padding = '10px';
-      internalModal.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
-      internalModal.innerHTML = `<div style="text-align: right;"><button id="closeInternalModal">Close</button></div>${internalLinks}`;
+      if (internalLinkCount > 0) {
+        let internalModal = document.createElement('div');
+        internalModal.id = 'internalLinkModal';
+        internalModal.style.display = 'none';
+        internalModal.style.position = 'fixed';
+        internalModal.style.zIndex = '1000001';
+        internalModal.style.left = '50%';
+        internalModal.style.top = '50%';
+        internalModal.style.transform = 'translate(-50%, -50%)';
+        internalModal.style.width = '50%';
+        internalModal.style.height = '50%';
+        internalModal.style.overflowY = 'scroll';
+        internalModal.style.backgroundColor = '#fff';
+        internalModal.style.border = '1px solid #ccc';
+        internalModal.style.padding = '10px';
+        internalModal.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
+        internalModal.innerHTML = `<div style="text-align: right;"><button id="closeInternalModal">Close</button></div>${internalLinks}`;
 
-      document.body.appendChild(internalModal);
+        document.body.appendChild(internalModal);
+
+        // Přidání funkce pro zobrazení modálního okna při kliknutí na "Internal Links: XX"
+        document.getElementById('internalLinkCount').addEventListener('click', () => {
+          internalModal.style.display = 'block';
+        });
+
+        // Přidání funkce pro zavření modálního okna
+        document.getElementById('closeInternalModal').addEventListener('click', () => {
+          internalModal.style.display = 'none';
+        });
+      }
 
       // Vytvoření modálního okna pro zobrazení externích odkazů
-      let externalModal = document.createElement('div');
-      externalModal.id = 'externalLinkModal';
-      externalModal.style.display = 'none';
-      externalModal.style.position = 'fixed';
-      externalModal.style.zIndex = '1000001';
-      externalModal.style.left = '50%';
-      externalModal.style.top = '50%';
-      externalModal.style.transform = 'translate(-50%, -50%)';
-      externalModal.style.width = '50%';
-      externalModal.style.height = '50%';
-      externalModal.style.overflowY = 'scroll';
-      externalModal.style.backgroundColor = '#fff';
-      externalModal.style.border = '1px solid #ccc';
-      externalModal.style.padding = '10px';
-      externalModal.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
-      externalModal.innerHTML = `<div style="text-align: right;"><button id="closeExternalModal">Close</button></div>${externalLinks}`;
-
-      document.body.appendChild(externalModal);
-
-      // Přidání funkce pro zobrazení modálního okna při kliknutí na "Missing Alts: XX"
-      document.getElementById('missingAltsCount').addEventListener('click', () => {
-        missingAltsModal.style.display = 'block';
-      });
-
-      // Přidání funkce pro zobrazení modálního okna při kliknutí na "Internal Links: XX"
-      document.getElementById('internalLinkCount').addEventListener('click', () => {
-        internalModal.style.display = 'block';
-      });
-
-      // Přidání funkce pro zobrazení modálního okna při kliknutí na "External Links: XX"
-      document.getElementById('externalLinkCount').addEventListener('click', () => {
-        externalModal.style.display = 'block';
-      });
-
-      // Přidání funkce pro zavření modálního okna (missing alts)
-      document.getElementById('closeMissingAltsModal').addEventListener('click', () => {
-        missingAltsModal.style.display = 'none';
-      });
-
-      // Přidání funkce pro zavření modálního okna (internal)
-      document.getElementById('closeInternalModal').addEventListener('click', () => {
-        internalModal.style.display = 'none';
-      });
-
-      // Přidání funkce pro zavření modálního okna (external)
-      document.getElementById('closeExternalModal').addEventListener('click', () => {
+      if (externalLinkCount > 0) {
+        let externalModal = document.createElement('div');
+        externalModal.id = 'externalLinkModal';
         externalModal.style.display = 'none';
-      });
+        externalModal.style.position = 'fixed';
+        externalModal.style.zIndex = '1000001';
+        externalModal.style.left = '50%';
+        externalModal.style.top = '50%';
+        externalModal.style.transform = 'translate(-50%, -50%)';
+        externalModal.style.width = '50%';
+        externalModal.style.height = '50%';
+        externalModal.style.overflowY = 'scroll';
+        externalModal.style.backgroundColor = '#fff';
+        externalModal.style.border = '1px solid #ccc';
+        externalModal.style.padding = '10px';
+        externalModal.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
+        externalModal.innerHTML = `<div style="text-align: right;"><button id="closeExternalModal">Close</button></div>${externalLinks}`;
+
+        document.body.appendChild(externalModal);
+
+        // Přidání funkce pro zobrazení modálního okna při kliknutí na "External Links: XX"
+        document.getElementById('externalLinkCount').addEventListener('click', () => {
+          externalModal.style.display = 'block';
+        });
+
+        // Přidání funkce pro zavření modálního okna
+        document.getElementById('closeExternalModal').addEventListener('click', () => {
+          externalModal.style.display = 'none';
+        });
+      }
     } else {
       // Aktualizace počtu obrázků, chybějících alt tagů, velikosti stránky, interních a externích odkazů při obnovení stránky
       const pngCount = document.querySelectorAll('img[src$=".png"]').length;
@@ -215,36 +246,111 @@
       if (tiffCount > 0) imageText += `, TIFF: ${tiffCount}`;
       if (webpCount > 0) imageText += `, WEBP: ${webpCount}`;
 
-      imageText += ` | <span id="missingAltsCount" class="clickable">Missing Alts: ${missingAltCount}</span> | Page Size: ${totalSizeKB} KB | <span id="internalLinkCount" class="clickable">Internal Links: ${internalLinkCount}</span> | <span id="externalLinkCount" class="clickable">External Links: ${externalLinkCount}</span>`;
+      let missingAltsLink = missingAltCount > 0 
+        ? `<span id="missingAltsCount" class="clickable" style="font-weight: bold; text-decoration: none;" onmouseover="this.style.textDecoration='underline';" onmouseout="this.style.textDecoration='none';">Missing Alts: ${missingAltCount}</span>` 
+        : `Missing Alts: ${missingAltCount}`;
+
+      let internalLinksLink = internalLinkCount > 0 
+        ? `<span id="internalLinkCount" class="clickable" style="font-weight: bold; text-decoration: none;" onmouseover="this.style.textDecoration='underline';" onmouseout="this.style.textDecoration='none';">Internal Links: ${internalLinkCount}</span>` 
+        : `Internal Links: ${internalLinkCount}`;
+
+      let externalLinksLink = externalLinkCount > 0 
+        ? `<span id="externalLinkCount" class="clickable" style="font-weight: bold; text-decoration: none;" onmouseover="this.style.textDecoration='underline';" onmouseout="this.style.textDecoration='none';">External Links: ${externalLinkCount}</span>` 
+        : `External Links: ${externalLinkCount}`;
+
+      imageText += ` | ${missingAltsLink} | Page Size: ${totalSizeKB} KB | ${internalLinksLink} | ${externalLinksLink} | ${themeLink}`;
 
       toolbar.innerHTML = `SEO BAR - ${imageText}`;
       document.body.style.marginTop = '30px';
       document.body.prepend(toolbar);
 
-      // Znovu přidání funkcí pro modální okna
-      document.getElementById('missingAltsCount').addEventListener('click', () => {
-        missingAltsModal.style.display = 'block';
-      });
-
-      document.getElementById('closeMissingAltsModal').addEventListener('click', () => {
+      // Znovu přidání funkcí pro modální okna, pokud jsou počty > 0
+      if (missingAltCount > 0) {
+        let missingAltsModal = document.createElement('div');
+        missingAltsModal.id = 'missingAltsModal';
         missingAltsModal.style.display = 'none';
-      });
+        missingAltsModal.style.position = 'fixed';
+        missingAltsModal.style.zIndex = '1000001';
+        missingAltsModal.style.left = '50%';
+        missingAltsModal.style.top = '50%';
+        missingAltsModal.style.transform = 'translate(-50%, -50%)';
+        missingAltsModal.style.width = '50%';
+        missingAltsModal.style.height = '50%';
+        missingAltsModal.style.overflowY = 'scroll';
+        missingAltsModal.style.backgroundColor = '#fff';
+        missingAltsModal.style.border = '1px solid #ccc';
+        missingAltsModal.style.padding = '10px';
+        missingAltsModal.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
+        missingAltsModal.innerHTML = `<div style="text-align: right;"><button id="closeMissingAltsModal">Close</button></div>${missingAlts}`;
 
-      document.getElementById('internalLinkCount').addEventListener('click', () => {
-        internalModal.style.display = 'block';
-      });
+        document.body.appendChild(missingAltsModal);
 
-      document.getElementById('closeInternalModal').addEventListener('click', () => {
+        document.getElementById('missingAltsCount').addEventListener('click', () => {
+          missingAltsModal.style.display = 'block';
+        });
+
+        document.getElementById('closeMissingAltsModal').addEventListener('click', () => {
+          missingAltsModal.style.display = 'none';
+        });
+      }
+
+      if (internalLinkCount > 0) {
+        let internalModal = document.createElement('div');
+        internalModal.id = 'internalLinkModal';
         internalModal.style.display = 'none';
-      });
+        internalModal.style.position = 'fixed';
+        internalModal.style.zIndex = '1000001';
+        internalModal.style.left = '50%';
+        internalModal.style.top = '50%';
+        internalModal.style.transform = 'translate(-50%, -50%)';
+        internalModal.style.width = '50%';
+        internalModal.style.height = '50%';
+        internalModal.style.overflowY = 'scroll';
+        internalModal.style.backgroundColor = '#fff';
+        internalModal.style.border = '1px solid #ccc';
+        internalModal.style.padding = '10px';
+        internalModal.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
+        internalModal.innerHTML = `<div style="text-align: right;"><button id="closeInternalModal">Close</button></div>${internalLinks}`;
 
-      document.getElementById('externalLinkCount').addEventListener('click', () => {
-        externalModal.style.display = 'block';
-      });
+        document.body.appendChild(internalModal);
 
-      document.getElementById('closeExternalModal').addEventListener('click', () => {
+        document.getElementById('internalLinkCount').addEventListener('click', () => {
+          internalModal.style.display = 'block';
+        });
+
+        document.getElementById('closeInternalModal').addEventListener('click', () => {
+          internalModal.style.display = 'none';
+        });
+      }
+
+      if (externalLinkCount > 0) {
+        let externalModal = document.createElement('div');
+        externalModal.id = 'externalLinkModal';
         externalModal.style.display = 'none';
-      });
+        externalModal.style.position = 'fixed';
+        externalModal.style.zIndex = '1000001';
+        externalModal.style.left = '50%';
+        externalModal.style.top = '50%';
+        externalModal.style.transform = 'translate(-50%, -50%)';
+        externalModal.style.width = '50%';
+        externalModal.style.height = '50%';
+        externalModal.style.overflowY = 'scroll';
+        externalModal.style.backgroundColor = '#fff';
+        externalModal.style.border = '1px solid #ccc';
+        externalModal.style.padding = '10px';
+        externalModal.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
+        externalModal.innerHTML = `<div style="text-align: right;"><button id="closeExternalModal">Close</button></div>${externalLinks}`;
+
+        document.body.appendChild(externalModal);
+
+        document.getElementById('externalLinkCount').addEventListener('click', () => {
+          externalModal.style.display = 'block';
+        });
+
+        document.getElementById('closeExternalModal').addEventListener('click', () => {
+          externalModal.style.display = 'none';
+        });
+      }
     }
   } else {
     let toolbar = document.querySelector('.seo-toolbar');
